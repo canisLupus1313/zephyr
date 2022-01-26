@@ -8,6 +8,8 @@
 #include <sys/reboot.h>
 #include <openthread/instance.h>
 #include <openthread/platform/misc.h>
+#include <sys_clock.h>
+#include <bluetooth/bluetooth.h>
 
 #include "platform-zephyr.h"
 
@@ -16,7 +18,10 @@ void otPlatReset(otInstance *aInstance)
 	ARG_UNUSED(aInstance);
 
 	/* This function does nothing on the Posix platform. */
-	sys_reboot(SYS_REBOOT_WARM);
+	bt_le_adv_stop();
+	otThreadSetEnabled(aInstance, false);
+	otIp6SetEnabled(aInstance, false);
+	//sys_reboot(SYS_REBOOT_WARM);
 }
 
 otPlatResetReason otPlatGetResetReason(otInstance *aInstance)
