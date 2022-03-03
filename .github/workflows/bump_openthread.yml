@@ -1,0 +1,44 @@
+# .github/workflows/example.yml
+
+name: Merge upstream branches
+on:
+  schedule:
+    # runs every 5 min
+    - cron:  '*/5 * * * *'
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Zephyr
+        uses: actions/checkout@v2
+        with:
+          path: zephyr
+      - name: Checkout openthread
+        uses: actions/checkout@v2
+        with:
+          repository: zephyrproject-rtos/openthread.git
+          path: openthread
+          ref: zephyr
+      - name: Generate OpenThread integration
+        run: |
+            cd openthread
+            REV=`git rev-parse HEAD`
+            cd ../zephyr
+            OLDREV=`grep -A1 "name: openthread" west.yml | grep revision | sed -e "s/.*revision: //"`
+            if [ $REV == $OLDREV ]; then
+              exit 0
+            fi
+            sed -i "s/$OLDREV/$REV/g" west.yml
+            git config user.name 'pbida'
+            git config user.email 'pbida@users.noreply.github.com'
+            git add .
+            git commit -s -m "manifest: openthread: bump version of openthread"
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: Add report file
+          title: '[Example] Add report file'
+          body: This PR is auto-generated for test purpose.
+          labels: report, automated pr
+          path: zephyr
