@@ -249,3 +249,7 @@ config OPENTHREAD_UDP_FORWARD
 
 config OPENTHREAD_UPTIME
 	bool "Openthread uptime counter"
+
+config OPENTHREAD_DNS_OVER_TCP
+	bool "Configure DNS over TCP functionality for openthread"
+	select OPENTHREAD_TCP_ENABLE
